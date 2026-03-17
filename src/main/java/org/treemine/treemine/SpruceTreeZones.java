@@ -27,39 +27,37 @@ public final class SpruceTreeZones extends JavaPlugin implements Listener {
     private static final Material TOOL_MATERIAL = Material.SPRUCE_SAPLING;
     private static final Material LOG = Material.SPRUCE_LOG;
 
-    private static final Component WAND_NAME = Component.text("Древорезка")
+    private static final Component WAND_NAME = Component.text("Treewand")
             .color(NamedTextColor.YELLOW)
             .decorate(TextDecoration.BOLD);
 
     private static final List<Component> WAND_LORE = List.of(
-            Component.text("ЛКМ по блоку → 1 точка", NamedTextColor.GRAY),
-            Component.text("ПКМ по блоку → создать зону", NamedTextColor.GRAY)
+            Component.text("LMB - first point", NamedTextColor.GRAY),
+            Component.text("RMB - create zone", NamedTextColor.GRAY)
     );
 
     private static final int BAR_SEGMENTS = 20;
     private static final int BASE_HITS = 10;
-    private static final long REGEN_DELAY_TICKS = 600; // 30 секунд
+    private static final long REGEN_DELAY_TICKS = 600;
 
-    // Зоны: имя → Zone
+    
     private final Map<String, Zone> zones = new HashMap<>();
 
-    // Удары по деревьям: игрок → (локация корня → счётчик ударов)
+    
     private final Map<UUID, Map<Location, Integer>> playerHits = new HashMap<>();
 
-    // Сломанные деревья, ожидающие регенерации (для возможной оптимизации/проверок)
+    
     private final Set<Location> brokenTrees = new HashSet<>();
 
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         //saveDefaultConfig();
-        //loadZones(); // если хочешь сохранять зоны между перезапусками
-        getLogger().info("SpruceTreeZones включён!");
+        //loadZones(); 
+        getLogger().info("SpruceTreeZones Enabled!");
     }
 
     private void loadZones() {
-        // Здесь можно загрузить зоны из config.yml, если нужно
-        // Пока оставляем пустым (зоны создаются вручную)
     }
 
     @Override
@@ -67,12 +65,12 @@ public final class SpruceTreeZones extends JavaPlugin implements Listener {
         if (cmd.getName().equalsIgnoreCase("treewand")) {
             if (!(sender instanceof Player p)) return true;
             if (!p.hasPermission("sprucetreezones.admin")) {
-                p.sendMessage(Component.text("Нет прав!", NamedTextColor.RED));
+                p.sendMessage(Component.text("No rights!", NamedTextColor.RED));
                 return true;
             }
             p.getInventory().addItem(createWand());
-            p.sendMessage(Component.text("Древорезка получена!", NamedTextColor.GREEN)
-                    .append(Component.text(" ЛКМ — 1 точка, ПКМ — 2 точка зоны.", NamedTextColor.GRAY)));
+            p.sendMessage(Component.text("Wand is given!", NamedTextColor.GREEN)
+                    .append(Component.text("LMB - first point, RMB - second point", NamedTextColor.GRAY)));
             return true;
         }
         return false;
@@ -101,14 +99,14 @@ public final class SpruceTreeZones extends JavaPlugin implements Listener {
         if (e.getAction() == Action.LEFT_CLICK_BLOCK && e.getClickedBlock() != null) {
             Location loc = e.getClickedBlock().getLocation();
             getConfig().set("players." + p.getUniqueId() + ".pos1", loc);
-            p.sendMessage(Component.text("Первая точка: " + formatLoc(loc), NamedTextColor.YELLOW));
+            p.sendMessage(Component.text("First point: " + formatLoc(loc), NamedTextColor.YELLOW));
             saveConfig();
         } else if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock() != null) {
             Location pos2 = e.getClickedBlock().getLocation();
             Location pos1 = getConfig().getLocation("players." + p.getUniqueId() + ".pos1");
 
             if (pos1 == null) {
-                p.sendMessage(Component.text("Сначала поставь первую точку ЛКМ!", NamedTextColor.RED));
+                p.sendMessage(Component.text("Place a first point first!", NamedTextColor.RED));
                 return;
             }
 
@@ -123,12 +121,12 @@ public final class SpruceTreeZones extends JavaPlugin implements Listener {
 
             String zoneName = "zone_" + min.getBlockX() + "_" + min.getBlockZ();
             if (zones.containsKey(zoneName)) {
-                p.sendMessage(Component.text("Зона здесь уже существует!", NamedTextColor.RED));
+                p.sendMessage(Component.text("Zone is already here!", NamedTextColor.RED));
                 return;
             }
 
             zones.put(zoneName, new Zone(min, max));
-            p.sendMessage(Component.text("Зона создана: " + zoneName, NamedTextColor.GREEN));
+            p.sendMessage(Component.text("Zone crated: " + zoneName, NamedTextColor.GREEN));
 
             getConfig().set("zones." + zoneName + ".min", min);
             getConfig().set("zones." + zoneName + ".max", max);
@@ -155,7 +153,7 @@ public final class SpruceTreeZones extends JavaPlugin implements Listener {
 
         List<Location> treeBlocks = getTreeBlocks(loc);
         if (treeBlocks.size() < 3) {
-            p.sendActionBar(Component.text("Слишком маленькое дерево", NamedTextColor.RED));
+            p.sendActionBar(Component.text("Tree is to small", NamedTextColor.RED));
             return;
         }
 
@@ -165,7 +163,7 @@ public final class SpruceTreeZones extends JavaPlugin implements Listener {
             int eff = tool.getEnchantmentLevel(Enchantment.EFFICIENCY);
             hitsNeeded += eff * 3;
             int unb = tool.getEnchantmentLevel(Enchantment.UNBREAKING);
-            hitsNeeded += unb * 2;  // небольшое увеличение "прочности" дерева
+            hitsNeeded += unb * 2;
         }
 
         UUID uuid = p.getUniqueId();
@@ -179,7 +177,7 @@ public final class SpruceTreeZones extends JavaPlugin implements Listener {
 
         String bar = "§a▮".repeat(filled) + "§7▯".repeat(BAR_SEGMENTS - filled);
 
-        p.sendActionBar(Component.text("Дерево: " + bar + " §7(" + current + "/" + hitsNeeded + ")")
+        p.sendActionBar(Component.text("Tree: " + bar + " §7(" + current + "/" + hitsNeeded + ")")
                 .color(NamedTextColor.YELLOW));
 
         p.playSound(loc, Sound.BLOCK_WOOD_HIT, 0.7f, 0.9f);
@@ -188,7 +186,7 @@ public final class SpruceTreeZones extends JavaPlugin implements Listener {
             for (Location treeLoc : treeBlocks) {
                 treeLoc.getBlock().setType(Material.AIR);
             }
-            p.sendActionBar(Component.text("Дерево сломано! Возродится через 30 сек...", NamedTextColor.GREEN));
+            p.sendActionBar(Component.text("Tree mined! Reset in 30 seconds...", NamedTextColor.GREEN));
 
             brokenTrees.addAll(treeBlocks);
 
