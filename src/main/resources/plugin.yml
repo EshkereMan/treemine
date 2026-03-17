@@ -2,12 +2,12 @@ name: SpruceTreeZones
 version: 1.1
 main: org.treemine.treemine.SpruceTreeZones
 api-version: '1.21'
-author: YourName
-description: Зоны с живучими еловыми деревьями — множественные удары + шкала + реген 30 сек
+author: Mugen
+description: Tree mine zone
 commands:
   treewand:
-    description: Получить волшебную палочку для создания зон
-    usage: /<command>
+    description: Get tree zone wand
+    usage: /treewand
 permissions:
   sprucetreezones.admin:
     default: op
