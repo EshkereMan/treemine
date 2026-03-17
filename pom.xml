@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.treemine.treemine</groupId>          <!-- поменял на более логичный groupId -->
+    <groupId>org.treemine.treemine</groupId>         
     <artifactId>SpruceTreeZones</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -12,7 +12,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <shade.plugin.version>3.6.2</shade.plugin.version>   <!-- вынесли в property для удобства -->
+        <shade.plugin.version>3.6.2</shade.plugin.version>  
     </properties>
 
     <repositories>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.11-R0.1-SNAPSHOT</version>   <!-- если не тянет → попробуйте 1.21.3-R0.1-SNAPSHOT или последнюю стабильную -->
+            <version>1.21.11-R0.1-SNAPSHOT</version>  
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -36,7 +36,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>   <!-- добавляем явно, чтобы точно работал с Java 21 -->
+                <version>3.13.0</version>  
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -55,8 +55,6 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <!-- если хотите минимизировать размер jar, можно добавить -->
-                            <!-- <minimizeJar>true</minimizeJar> -->
                         </configuration>
                     </execution>
                 </executions>
